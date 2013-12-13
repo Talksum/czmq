@@ -29,6 +29,9 @@ EXTRA_DIST = \
 	examples/security/ironhouse2.c \
 	examples/security/README.txt \
 	examples/security/LICENSE \
+	examples/proxy/zproxy_bench.c \
+	examples/proxy/README.txt \
+	examples/proxy/LICENSE \
 	foreign/trex/history.txt \
 	foreign/trex/LICENSE \
 	foreign/trex/README \
