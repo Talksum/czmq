@@ -481,7 +481,7 @@ zframe_put_uint64 (zframe_t *self, uint64_t data)
 //  For allocation purpose calculate: (string length + 2) bytes
 
 int
-zframe_put_string (zframe_t *self, char *data)
+zframe_put_string (zframe_t *self, const char *data)
 {
     assert (self);
     uint16_t size = strlen (data);
@@ -702,17 +702,17 @@ zframe_test (bool verbose)
 
     // Write custom frame
     frame = zframe_new (NULL, 45);
-    size_t test_8bit  = 0xFF;
-    size_t test_16bit = 0xFFFF;
-    size_t test_32bit = 0xFFFFFFFF;
-    uint64_t test_64bit = 0xFFFFFFFFFFFFFFFFUL;
+    uint8_t  test_8bit  = 0xFF;
+    uint16_t test_16bit = 0xFFFF;
+    uint32_t test_32bit = 0xFFFFFFFF;
+    uint64_t test_64bit = 0xFFFFFFFFFFFFFFFF;
     char *test_string = "Hello World!";
     zuuid_t *test_uuid = zuuid_new ();
-    rc = zframe_put_uint8 (frame, test_64bit);
+    rc = zframe_put_uint8 (frame, test_8bit);
     assert (rc == 0);
-    rc = zframe_put_uint16 (frame, test_64bit);
+    rc = zframe_put_uint16 (frame, test_16bit);
     assert (rc == 0);
-    rc = zframe_put_uint32 (frame, test_64bit);
+    rc = zframe_put_uint32 (frame, test_32bit);
     assert (rc == 0);
     rc = zframe_put_uint64 (frame, test_64bit);
     assert (rc == 0);
@@ -721,7 +721,7 @@ zframe_test (bool verbose)
     rc = zframe_put_block (frame, zuuid_data (test_uuid), 16);
     assert (rc == 0);
     // one byte more than allocated, expect 1
-    rc = zframe_put_uint8 (frame, test_64bit);
+    rc = zframe_put_uint8 (frame, test_8bit);
     assert (rc == -1);
     rc = zframe_send (&frame, output, 0);
     assert (rc == 0);
@@ -746,12 +746,15 @@ zframe_test (bool verbose)
     assert (bit64 == test_64bit);
     char *hello = zframe_get_string (frame);
     assert (streq (hello, test_string));
+    free (hello);
     zuuid_t *uuid = zuuid_new ();
     zframe_get_block (frame, zuuid_data (uuid), 16);
     assert (zuuid_eq (uuid, zuuid_data (test_uuid)));
+    zuuid_destroy (&uuid);
     zframe_destroy (&frame);
     assert (frame == NULL);
 
+    zuuid_destroy (&test_uuid);
     zctx_destroy (&ctx);
     //  @end
     printf ("OK\n");

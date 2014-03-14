@@ -40,6 +40,14 @@ CZMQ_EXPORT size_t
 CZMQ_EXPORT size_t
     zchunk_fill (zchunk_t *self, byte filler, size_t size);
 
+//  Return a full copy of a chunk
+CZMQ_EXPORT zchunk_t *
+    zchunk_dup (zchunk_t *self);
+
+//  Append user-supplied data to chunk, return resulting chunk size
+CZMQ_EXPORT size_t
+    zchunk_append (zchunk_t *self, const void *data, size_t size);
+
 //  Read chunk from an open file descriptor
 CZMQ_EXPORT zchunk_t *
     zchunk_read (FILE *handle, size_t bytes);
@@ -47,6 +55,10 @@ CZMQ_EXPORT zchunk_t *
 //  Write chunk to an open file descriptor
 CZMQ_EXPORT int
     zchunk_write (zchunk_t *self, FILE *handle);
+
+//  Print contents of chunk to stderr
+CZMQ_EXPORT void
+    zchunk_print (zchunk_t *self);
 
 //  Self test of this class
 CZMQ_EXPORT int
@@ -69,6 +81,20 @@ EXAMPLE
     assert (chunk);
     assert (zchunk_size (chunk) == 10);
     assert (memcmp (zchunk_data (chunk), "1234567890", 10) == 0);
+    zchunk_destroy (&chunk);
+
+    chunk = zchunk_new (NULL, 10);
+    zchunk_append (chunk, "12345678", 8);
+    zchunk_append (chunk, "90ABCDEF", 8);
+    zchunk_append (chunk, "GHIJKLMN", 8);
+    assert (memcmp (zchunk_data (chunk), "1234567890", 10) == 0);
+    assert (zchunk_size (chunk) == 10);
+    
+    zchunk_t *copy = zchunk_dup (chunk);
+    assert (memcmp (zchunk_data (copy), "1234567890", 10) == 0);
+    assert (zchunk_size (copy) == 10);
+    zchunk_destroy (&copy);
+    
     zchunk_destroy (&chunk);
 ----
 

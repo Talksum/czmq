@@ -27,7 +27,7 @@
 @header
     Expandable hash table container
 @discuss
-    Note that it's relatively slow (~50K insertions/deletes per second), so
+    Note that it's relatively slow (~50k insertions/deletes per second), so
     don't do inserts/updates on the critical path for message I/O. It can
     do ~2.5M lookups per second for 16-char keys. Timed on a 1.6GHz CPU.
 @end
@@ -466,7 +466,7 @@ zhash_foreach (zhash_t *self, zhash_foreach_fn *callback, void *argument)
 //  the file. If you use a null format, all comments are deleted.
 
 void
-zhash_comment (zhash_t *self, char *format, ...)
+zhash_comment (zhash_t *self, const char *format, ...)
 {
     if (format) {
         if (!self->comments) {
@@ -491,7 +491,7 @@ zhash_comment (zhash_t *self, char *format, ...)
 //  Returns 0 if OK, else -1 if a file error occurred
 
 int
-zhash_save (zhash_t *self, char *filename)
+zhash_save (zhash_t *self, const char *filename)
 {
     assert (self);
 
@@ -526,7 +526,7 @@ zhash_save (zhash_t *self, char *filename)
 //  Returns 0 if OK, else -1 if a file was not readable.
 
 int
-zhash_load (zhash_t *self, char *filename)
+zhash_load (zhash_t *self, const char *filename)
 {
     assert (self);
     zhash_autofree (self);
@@ -537,9 +537,9 @@ zhash_load (zhash_t *self, char *filename)
     //  file.
 
     //  Take copy of filename in case self->filename is same string.
-    filename = strdup (filename);
+    char *filename_copy = strdup (filename);
     free (self->filename);
-    self->filename = filename;
+    self->filename = filename_copy;
     self->modified = zsys_file_modified (self->filename);
     FILE *handle = fopen (self->filename, "r");
     if (!handle)

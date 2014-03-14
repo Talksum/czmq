@@ -66,6 +66,10 @@ CZMQ_EXPORT size_t
 CZMQ_EXPORT size_t
     zchunk_fill (zchunk_t *self, byte filler, size_t size);
 
+//  Append user-supplied data to chunk, return resulting chunk size
+CZMQ_EXPORT size_t
+    zchunk_append (zchunk_t *self, const void *data, size_t size);
+
 //  Read chunk from an open file descriptor
 CZMQ_EXPORT zchunk_t *
     zchunk_read (FILE *handle, size_t bytes);
@@ -73,6 +77,20 @@ CZMQ_EXPORT zchunk_t *
 //  Write chunk to an open file descriptor
 CZMQ_EXPORT int
     zchunk_write (zchunk_t *self, FILE *handle);
+
+//  Create copy of chunk, as new chunk object. Returns a fresh zchunk_t
+//  object, or NULL if there was not enough heap memory.
+CZMQ_EXPORT zchunk_t *
+    zchunk_dup (zchunk_t *self);
+
+//  Dump chunk to FILE stream, for debugging and tracing.
+CZMQ_EXPORT void
+    zchunk_fprint (zchunk_t *self, FILE *file);
+
+//  Dump message to stderr, for debugging and tracing.
+//  See zchunk_fprint for details
+CZMQ_EXPORT void
+    zchunk_print (zchunk_t *self);
 
 //  Self test of this class
 CZMQ_EXPORT int

@@ -110,7 +110,7 @@ zauth_destroy (zauth_t **self_p)
 //  any non-whitelisted addresses are treated as blacklisted.
 
 void
-zauth_allow (zauth_t *self, char *address)
+zauth_allow (zauth_t *self, const char *address)
 {
     zstr_sendx (self->pipe, "ALLOW", address, NULL);
     //  Wait for completion
@@ -125,7 +125,7 @@ zauth_allow (zauth_t *self, char *address)
 //  and a blacklist, only the whitelist takes effect.
 
 void
-zauth_deny (zauth_t *self, char *address)
+zauth_deny (zauth_t *self, const char *address)
 {
     zstr_sendx (self->pipe, "DENY", address, NULL);
     //  Wait for completion
@@ -139,7 +139,7 @@ zauth_deny (zauth_t *self, char *address)
 //  modify the password file at any time; it is reloaded automatically.
 
 void
-zauth_configure_plain (zauth_t *self, char *domain, char *filename)
+zauth_configure_plain (zauth_t *self, const char *domain, const char *filename)
 {
     assert (self);
     assert (domain);
@@ -159,7 +159,7 @@ zauth_configure_plain (zauth_t *self, char *domain, char *filename)
 //  CURVE_ALLOW_ANY for the location.
 
 void
-zauth_configure_curve (zauth_t *self, char *domain, char *location)
+zauth_configure_curve (zauth_t *self, const char *domain, const char *location)
 {
     assert (self);
     assert (domain);
@@ -440,12 +440,12 @@ s_agent_authenticate (agent_t *self)
             if (zhash_lookup (self->whitelist, request->address)) {
                 allowed = true;
                 if (self->verbose) 
-                    printf ("I: PASSED (whitelist) address=%s\n", request->address);
+                    printf ("ZAUTH I: PASSED (whitelist) address=%s\n", request->address);
             }
             else {
                 denied = true;
                 if (self->verbose) 
-                    printf ("I: DENIED (not in whitelist) address=%s\n", request->address);
+                    printf ("ZAUTH I: DENIED (not in whitelist) address=%s\n", request->address);
             }
         }
         else
@@ -453,12 +453,12 @@ s_agent_authenticate (agent_t *self)
             if (zhash_lookup (self->blacklist, request->address)) {
                 denied = true;
                 if (self->verbose) 
-                    printf ("I: DENIED (blacklist) address=%s\n", request->address);
+                    printf ("ZAUTH I: DENIED (blacklist) address=%s\n", request->address);
             }
             else {
                 allowed = true;
                 if (self->verbose) 
-                    printf ("I: PASSED (not in blacklist) address=%s\n", request->address);
+                    printf ("ZAUTH I: PASSED (not in blacklist) address=%s\n", request->address);
             }
         }
         //  Mechanism-specific checks
@@ -466,7 +466,7 @@ s_agent_authenticate (agent_t *self)
             if (streq (request->mechanism, "NULL") && !allowed) {
                 //  For NULL, we allow if the address wasn't blacklisted
                 if (self->verbose) 
-                    printf ("I: ALLOWED (NULL)\n");
+                    printf ("ZAUTH I: ALLOWED (NULL)\n");
                 allowed = true;
             }
             else
@@ -499,20 +499,20 @@ s_authenticate_plain (agent_t *self, zap_request_t *request)
         char *password = (char *) zhash_lookup (self->passwords, request->username);
         if (password && streq (password, request->password)) {
             if (self->verbose) 
-                printf ("I: ALLOWED (PLAIN) username=%s password=%s\n",
+                printf ("ZAUTH I: ALLOWED (PLAIN) username=%s password=%s\n",
                     request->username, request->password);
             return true;
         }
         else {
             if (self->verbose) 
-                printf ("I: DENIED (PLAIN) username=%s password=%s\n",
+                printf ("ZAUTH I: DENIED (PLAIN) username=%s password=%s\n",
                     request->username, request->password);
             return false;
         }
     }
     else {
         if (self->verbose) 
-            printf ("I: DENIED (PLAIN) no password file defined\n");
+            printf ("ZAUTH I: DENIED (PLAIN) no password file defined\n");
         return false;
     }
 }
@@ -524,19 +524,19 @@ s_authenticate_curve (agent_t *self, zap_request_t *request)
     //  TODO: load metadata from certificate and return via ZAP response
     if (self->allow_any) {
         if (self->verbose) 
-            printf ("I: ALLOWED (CURVE allow any client)\n");
+            printf ("ZAUTH I: ALLOWED (CURVE allow any client)\n");
         return true;
     }
     else
     if (self->certstore
     &&  zcertstore_lookup (self->certstore, request->client_key)) {
         if (self->verbose) 
-            printf ("I: ALLOWED (CURVE) client_key=%s\n", request->client_key);
+            printf ("ZAUTH I: ALLOWED (CURVE) client_key=%s\n", request->client_key);
         return true;
     }
     else {
         if (self->verbose) 
-            printf ("I: DENIED (CURVE) client_key=%s\n", request->client_key);
+            printf ("ZAUTH I: DENIED (CURVE) client_key=%s\n", request->client_key);
         return false;
     }
 }
